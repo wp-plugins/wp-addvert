@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.5.1
+  Version: 1.6
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.5.1";
+    const version = "1.6";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -61,14 +61,14 @@ class Addvert_Plugin {
         // Debug Stuff - noting bad going on here, don't worry!
         if ( isset($_GET['a']) && sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
 
-            define('WP_DEBUG_DISPLAY', true);
 
             echo "<!--\n";
             echo "ssl: ".self::check_ssl();
             echo "\ncurl: ".self::use_curl();
-            echo "\n";
+            echo "\nwrapper: ";
 
             echo $wrapper = self::check_ssl() ? 'https:' : 'http:';
+            echo "\n";
             $url = $wrapper . $this->_base . '/test.txt';
             
             if(self::use_curl()) {
@@ -84,7 +84,7 @@ class Addvert_Plugin {
             } else {
                echo file_get_contents($url); 
             }
-            echo "\n\n-->";
+            echo "\n-->";
 
         }
     }
