@@ -3,8 +3,8 @@ Contributors: riccardo.mastellone
 Donate link: 
 Tags: addvert, ecommerce
 Requires at least: 3.3
-Tested up to: 3.8.1
-Stable tag: 1.6
+Tested up to: 4.0
+Stable tag: 1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,8 +41,12 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 == Changelog ==
  
+= 1.7 =
+Introducing the [addvert] shortcode to place the button where you need
+Bugfixing
+  
 = 1.6 =
-Nothing special
+Cambiata la posizione dell'add button 
 
 = 1.5 =
 A lot of bug fixing 

