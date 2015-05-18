@@ -1,5 +1,5 @@
 === WP-Addvert ===
-Contributors: riccardo.mastellone, iazel
+Contributors: riccardo.mastellone, Iazel
 Donate link: 
 Tags: addvert, ecommerce
 Requires at least: 3.3
