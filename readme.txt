@@ -40,6 +40,9 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 
 == Changelog ==
+
+= 1.8 =
+Add more options and button themes sync
  
 = 1.7 =
 Introducing the [addvert] shortcode to place the button where you need
